@@ -61,6 +61,8 @@
         }
       }
 
+      console.log('tieramount', tierAmount)
+
       let timeIntervalChunks = this.analyticsData.data.data.filter((x, idx) => idx % 10 === 0).map((item) => {
         let int = parseInt(item.delegationTotal)
         return (int / 10 ** 18)
