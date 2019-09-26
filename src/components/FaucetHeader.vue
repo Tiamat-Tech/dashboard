@@ -71,7 +71,7 @@
                 <hr />
                 <b-nav-item
                   v-for="(menu, index) in menus.community"
-                  :key="index+'h'"
+                  :key="index+'c'"
                   :to="menu.to"
                   class="router"
                 >
@@ -188,7 +188,12 @@ export default class FaucetHeader extends Vue {
           to: "/bounty",
           text: "Bounty",
           name: "Bounty"
-        }
+        },
+        {
+          to: "/news",
+          text: "News",
+          name: "News"
+        },
       ],
       help: [
         {

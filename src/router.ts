@@ -18,6 +18,7 @@ import FeedbackForm from "./views/FeedbackForm.vue"
 import ValidatorManagement from "./dpos/views/ValidatorManagement.vue"
 import TransferGateway from "./views/TransferGateway.vue"
 import BountyPage from "./views/BountyPage.vue"
+import NewsPage from "./views/NewsPage.vue"
 import { plasmaModule } from "./store/plasma"
 
 Vue.use(VueRouter)
@@ -85,6 +86,11 @@ const router = new VueRouter({
       path: "/bounty",
       name: "bounty",
       component: BountyPage,
+    },
+    {
+      path: "/news",
+      name: "news",
+      component: NewsPage,
     },
     {
       path: "/game-assets",

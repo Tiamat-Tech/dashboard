@@ -145,7 +145,12 @@ export default class FaucetSidebar extends Vue {
           to: "/bounty",
           text: "Bounty",
           name: "Bounty"
-        }
+        },
+        {
+          to: "/news",
+          text: "News",
+          name: "News"
+        },
       ],
       help: [
         {
