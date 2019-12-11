@@ -9,7 +9,7 @@ import {
 } from "./types"
 import { plasmaModule } from "."
 import BN from "bn.js"
-import ERC20ABI from "loom-js/dist/mainnet-contracts/ERC20.json"
+// import ERC20ABI from "loom-js/dist/mainnet-contracts/ERC20.json"
 import debug from "debug"
 import { setNewTokenToLocalStorage, ZERO } from "@/utils"
 import { tokenService, TokenData } from "@/services/TokenService"
@@ -17,6 +17,8 @@ import { feedbackModule } from "@/feedback/store"
 import { i18n } from "@/i18n"
 import { formatTokenAmount } from "@/filters"
 import * as Sentry from "@sentry/browser"
+import { store } from ".."
+import { ERC20Factory } from "loom-js/dist/mainnet-contracts/ERC20Factory"
 const log = debug("plasma")
 
 export const contracts = new Map<string, ContractAdapter>()
@@ -170,7 +172,7 @@ export async function addToken(context: PlasmaContext, token: TokenData) {
   log("add token state ", state.coins)
   let contract
   try {
-    contract = new web3.eth.Contract(ERC20ABI, token.plasma) as ERC20
+    contract = ERC20Factory.connect(token.plasma, store.state.ethereum.signer!)
     await addContract(token.symbol, PlasmaTokenKind.ERC20, contract)
   } catch (error) {
     console.error("error ", error)

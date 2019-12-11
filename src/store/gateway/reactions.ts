@@ -1,20 +1,21 @@
 import { tokenService, TokenData } from "@/services/TokenService"
-import { ERC20 } from "@/store/plasma/web3-contracts/ERC20"
+import { ERC20 } from "../../contracts/types/ethers-contracts/ERC20"
 import { DashboardState, Funds } from "@/types"
 import BN from "bn.js"
 import debug from "debug"
-import { Address } from "loom-js"
+import { Address, EthereumGatewayV2, EthereumGatewayV1 } from "loom-js"
 import { IAddressMapping } from "loom-js/dist/contracts/address-mapper"
 import { Store } from "vuex"
 import { EventLog } from "web3-core"
 import { gatewayModule } from "."
 import { ethereumModule } from "../ethereum"
 import { plasmaModule } from "../plasma"
-import { ERC20Gateway_v2 } from "./contracts/ERC20Gateway_v2"
 import * as EthereumGateways from "./ethereum"
 import * as PlasmaGateways from "./plasma"
 import { EthPlasmSigner } from "./signer"
 import * as Sentry from "@sentry/browser"
+import { PlasmaSigner } from "../plasma/types"
+import { Signer } from "ethers"
 
 const log = debug("dash.gateway")
 
@@ -43,7 +44,7 @@ export function gatewayReactions(store: Store<DashboardState>) {
         Sentry.setExtra(mapping.to.chainId, mapping.to.local.toString())
 
         await setPlasmaAccount(mapping)
-        await initializeGateways(mapping, store.state.gateway.multisig)
+        await initializeGateways(mapping, store.state.gateway.multisig, store.state.ethereum.signer!)
 
         const ethereumGateways = EthereumGateways.service()
 
@@ -110,7 +111,7 @@ export function gatewayReactions(store: Store<DashboardState>) {
     gatewayModule.refreshAllowances()
   }
 
-  async function initializeGateways(mapping: IAddressMapping, multisig: { loom: boolean, main: boolean }) {
+  async function initializeGateways(mapping: IAddressMapping, multisig: { loom: boolean, main: boolean }, signer: Signer) {
     const addresses = {
       mainGateway: store.state.ethereum.contracts.mainGateway,
       loomGateway: store.state.ethereum.contracts.loomGateway,
@@ -120,6 +121,7 @@ export function gatewayReactions(store: Store<DashboardState>) {
         ethereumModule.web3,
         addresses,
         multisig,
+        signer,
       )
       const loomAddr = tokenService.getTokenAddressBySymbol("LOOM", "ethereum")
       ethereumGateway.add("LOOM", loomAddr)
@@ -201,7 +203,7 @@ export function gatewayReactions(store: Store<DashboardState>) {
 
 function listenToDepositApproval(
   account: string,
-  gw: ERC20Gateway_v2,
+  gw: EthereumGatewayV2 | EthereumGatewayV1,
   loom: ERC20,
 ) {
   // const approval = loom.filters.Approval(account, gw.address, null)
@@ -232,7 +234,7 @@ function listenToDepositApproval(
   )
 }
 
-function listenToDeposit(account: string, gw: ERC20Gateway_v2, loom: ERC20) {
+function listenToDeposit(account: string, gw: EthereumGatewayV2 | EthereumGatewayV1, loom: ERC20) {
   loom.events.Transfer(
     {
       filter: {

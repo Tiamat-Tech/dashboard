@@ -1,7 +1,7 @@
 import BN from "bn.js"
 import { ethers } from "ethers"
 import { Observable } from "rxjs"
-import { ERC20 } from "loom-js/dist/mainnet-contracts/ERC20"
+import { ERC20 } from "../../contracts/types/ethers-contracts/ERC20"
 import { GatewayState } from "../gateway/types"
 import { provider } from "web3-providers"
 

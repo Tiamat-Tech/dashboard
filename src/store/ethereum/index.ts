@@ -2,12 +2,11 @@
  * @module dpos-dashboard.ethereum
  */
 import * as Sentry from "@sentry/browser"
-
-import { ERC20 } from "@/store/plasma/web3-contracts/ERC20"
 import { Transfer } from "@/types"
 import BN from "bn.js"
 import debug from "debug"
-import ERC20ABI from "loom-js/dist/mainnet-contracts/ERC20.json"
+import { ERC20Factory } from "loom-js/dist/mainnet-contracts/ERC20Factory"
+import { ERC20 } from "../../contracts/types/ethers-contracts/ERC20"
 import { BareActionContext, getStoreBuilder } from "vuex-typex"
 import Web3 from "web3"
 import {
@@ -38,6 +37,7 @@ import { FortmaticAdapter } from "./wallets/fortmatic"
 import { TestWalletAdapter } from "./wallets/test-wallet"
 import { WalletConnectAdapter } from "./wallets/walletconnect"
 import Connector from "@walletconnect/core"
+import { store } from ".."
 
 declare type ActionContext = BareActionContext<EthereumState, HasEthereumState>
 
@@ -243,7 +243,6 @@ export async function refreshBalance(context: ActionContext, symbol: string) {
   return (
     contract.methods
       .balanceOf(context.state.address)
-      // @ts-ignore
       .call({
         from: context.state.address,
       })
@@ -326,7 +325,7 @@ export function initERC20(context: ActionContext, symbol: string) {
     throw new Error("Could not find contract address for " + symbol)
   }
   // @ts-ignore
-  const contract = new web3.eth.Contract(ERC20ABI, contractAddr) as ERC20
+  const contract = ERC20Factory.connect(contractAddr, store.state.ethereum.signer)
   erc20Contracts.set(symbol, contract)
 
   const account = context.state.address
