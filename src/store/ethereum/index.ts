@@ -241,15 +241,15 @@ export async function refreshBalance(context: ActionContext, symbol: string) {
   console.log(symbol, contract._address)
   coinState.loading = true
   return (
-    contract.methods
+    contract
       .balanceOf(context.state.address)
-      .call({
-        from: context.state.address,
-      })
       .then((ethersBN) => {
-        log("balanceOf %s %s ", symbol, ethersBN.toString())
+        console.log("balanceOf %s %s ", symbol, ethersBN.toString())
         context.state.balances[symbol] = new BN(ethersBN.toString())
         coinState.balance = new BN(ethersBN.toString())
+      })
+      .catch((err) => {
+        console.error("catch.... ", err)
       })
       .finally(() => {
         coinState.loading = false
@@ -308,17 +308,12 @@ export async function allowance(
     erc20Contracts.get(symbol),
     "Expected contract",
   )
-  const amount = await contract.methods
-    .allowance(context.state.address, spender)
-    // @ts-ignore
-    .call({
-      from: context.state.address,
-    })
+  const amount = await contract.allowance(context.state.address, spender)
   return new BN(amount.toString())
 }
 
 export function initERC20(context: ActionContext, symbol: string) {
-  log("initERC20", symbol, tokenService)
+  console.log("initERC20", symbol, tokenService)
   const contractAddr = tokenService.getTokenAddressBySymbol(symbol, "ethereum")
   log("initERC20", symbol, contractAddr)
   if (contractAddr === undefined) {
@@ -332,28 +327,17 @@ export function initERC20(context: ActionContext, symbol: string) {
   const refresh = () => ethereumModule.refreshBalance(symbol)
 
   // out out filters
-  const send = contract.events.Transfer(
-    {
-      fromBlock: "latest",
-      filter: {
-        from: account,
-      },
-    },
-    refresh,
-  )
-  const receive = contract.events.Transfer(
-    {
-      fromBlock: "latest",
-      filter: {
-        to: account,
-      },
-    },
-    refresh,
-  )
+  const sendFilter = contract.filters.Transfer(account, null)
+  const receiveFilter = contract.filters.Transfer(null, account)
 
-  send.on("data", refresh)
-  receive.on("data", refresh)
-
+  // send.on("data", refresh)
+  // receive.on("data", refresh)
+  contract.on(sendFilter, (from, to, value) => {
+    refresh
+  })
+  contract.on(receiveFilter, (from, to, value) => {
+    refresh
+  })
   ethereumModule.refreshBalance(symbol)
 
   return contract

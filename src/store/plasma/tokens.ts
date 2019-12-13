@@ -114,14 +114,12 @@ class ERC20Adapter implements ContractAdapter {
     return this.contract.address.toLocaleLowerCase()
   }
   async balanceOf(account: string) {
+
     const caller = await plasmaModule.getCallerAddress()
     return this.contract.methods
-      .balanceOf(account)
-      .call({
-        from: caller.local.toString(),
-      })
-      .then((v) => new BN(v.toString()))
-  }
+
+    // @ts-ignore
+    return this.contract.balanceOf(account).then((v) => new BN(v.toString()))}
   async allowance(account: string, to: string) {
     const caller = await plasmaModule.getCallerAddress()
     return this.contract.methods

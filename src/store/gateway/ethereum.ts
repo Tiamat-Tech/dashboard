@@ -150,7 +150,7 @@ export async function init(
   //   ERC20GatewayABI,
   //   addresses.loomGateway,
   // ) as ERC20Gateway_v2
-  const loomGateway: EthereumGatewayV2 | EthereumGatewayV1 = ERC20Factory.connect(addresses.loomGateway, signer)
+  const loomGateway: EthereumGatewayV2 | EthereumGatewayV1 = EthereumGatewayV2Factory.connect(addresses.loomGateway, signer)
   log("loom gateway initialized")
 
   // let vmcContract: any = null
