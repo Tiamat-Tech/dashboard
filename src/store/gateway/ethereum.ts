@@ -526,8 +526,13 @@ async function logEvents(address, gateway, symbol, depositEvent, withdrawEvent) 
   }
   const p1 = gateway
     // @ts-ignore
-    .getPastEvents(depositEvent, { filter: { from: address }, ...range })
-    .then((results) => logToHistory(results, depositEvent, symbol, "amount"))
+    .getPastEvents(depositEvent, { ...range })
+    .then((results) => {
+      const filteredResult = results.filter((result) => {
+        return result.returnValues.from == address
+      })
+      logToHistory(filteredResult, depositEvent, symbol, "amount")
+    })
     .catch((e) => console.error("error loading LoomCoinReceived", e.message))
 
   const p2 = gateway
